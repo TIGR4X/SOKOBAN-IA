@@ -5,11 +5,10 @@ class State():
     #movement: UP: (1,0), DOWN: (0,1), LEFT:(0,-1) o RIGHT: (0,1)
     
     #Constructor
-    def __init__(self, player, boxes, movement, depth):
+    def __init__(self, player, boxes, movement):
         self.player = player
         self.boxes = boxes
         self.movement = movement
-        self.depth = depth
 
     #Igualdad para validar la función __hash__
     def __eq__(self, otherState):
