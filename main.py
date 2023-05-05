@@ -49,13 +49,13 @@ def DFS(stateObj, obstacles, storages):
     #Añadir el nuevo nodo a la pila del arbol
     tree = deque([startNode])
 
-    #Repetido es un objeto conjunto de python para almacenar los estados ya visitados
-    repetido = set()
+    #repeated es un objeto conjunto de python para almacenar los estados ya visitados
+    repeated = set()
     
     while tree:
-        #Obtener el último nodo agregado y agregarlo como repetido
+        #Obtener el último nodo agregado y agregarlo como repeated
         currentNode = tree.pop()
-        repetido.add(currentNode.state)
+        repeated.add(currentNode.state)
 
         #Validar si el estado es meta y retornar qué nodo fue
         if(currentNode.state.isGoalState(storages)):
@@ -71,10 +71,10 @@ def DFS(stateObj, obstacles, storages):
         #Revertir el arreglo para validar el orden UDLR dispuesto en State
         validMovesStates.reverse()
 
-        #Crea un nodo hijo nuevo por cada operador posible y lo valida en los estados repetidos
+        #Crea un nodo hijo nuevo por cada operador posible y lo valida en los estados repeateds
         for childState in validMovesStates:
             childNode = Node(childState, currentNode, currentNode.depth+1)
-            if childNode.state in repetido:
+            if childNode.state in repeated:
 
                 continue
             else:
@@ -87,12 +87,12 @@ def BFS(stateObj, obstacles, storages):
     #Añadir el nuevo nodo a la cola del arbol
     tree = deque([startNode])
 
-    repetido = set()
+    repeated = set()
 
     while tree:
-        #Obtener el primer nodo agregado y agregarlo como repetido
+        #Obtener el primer nodo agregado y agregarlo como repeated
         currentNode = tree.popleft()
-        repetido.add(currentNode.state)
+        repeated.add(currentNode.state)
 
         if(currentNode.state.isGoalState(storages)):
             return currentNode
@@ -103,11 +103,52 @@ def BFS(stateObj, obstacles, storages):
         validMovesStates = currentNode.state.possibleMoves(storages, obstacles)
         for childState in validMovesStates:
             childNode = Node(childState, currentNode, currentNode.depth+1)
-            if childNode.state in repetido:
+            if childNode.state in repeated:
                 continue
             else:
                 tree.append(childNode)
     return None
+
+#IDS (Profundidad Iterativa - Max 64 Niveles, aumento unitario, si no: "No se pudo encontrar solución")
+def IDS(stateObj, obstacles, storages, limit=10, increase=1):
+    startNode = Node(stateObj, None, 0)
+    #Cola Temporal para los nodos cuya profundidad ha alcanzado el límite de búsqueda actual
+    limitTree = deque([startNode])
+
+    repeated = set()
+    limit = limit - increase
+    while limitTree:
+        #Cola principal para almacenar los nodos del árbol que aún no han sido expandidos. 
+        tree = limitTree.copy()
+        #Limpiamos el árbol de límites para preparlo a futuras iteraciones
+        limitTree = deque()
+
+        #Incremento del Límite en las Busquedas
+        limit = limit + increase
+        while tree :
+            #Obtiene el último nodo agregado y lo añade a repeated
+            currentNode = tree.pop()
+            repeated.add(currentNode.state)
+
+            if limit >= 64:
+                continue
+
+            if(currentNode.depth >= limit):
+                limitTree.append(currentNode)
+                continue
+
+            if(currentNode.state.isGoalState(storages)):
+                return currentNode
+
+            validMovesStates = currentNode.state.possibleMoves(storages, obstacles)
+            validMovesStates.reverse()
+
+            for childState in validMovesStates:
+                childNode = Node(childState, currentNode, currentNode.depth+1)
+                if childNode.state in repeated:
+                    continue
+                else:
+                    tree.append(childNode)
 
 #Funcion Auxiliar para impresión de las matrices resultantes
 def printMap(matrix):
@@ -153,6 +194,7 @@ def readBoard(lines, obstacles, storages, stateObj):
                 numstorages = numstorages + 1
             stateObj = State(agent,boxes,(0,0))
             numline = numline + 1
+    #Creación del Estado Inicial dado un input
     stateObj = State(agent,boxes,(0,0))
     return obstacles, storages, stateObj, height, width
 
@@ -187,7 +229,15 @@ if __name__ == '__main__':
         #Ejecución de la Busqueda por Amplitud
         result = BFS(state, obstacles, storages)
         if (result):
-            #printMap (result.getPathMaps(obstacles, storages, high, width))
+            #printMap (result.getPathMaps(obstacles, storages, height, width))
+            print (result.getMoves())
+        else:
+            print ('No fue posible solucionar el mapa')
+        
+        #Ejecución de la Busqueda Iterativa por Profundidad
+        result = IDS(state, obstacles, storages)
+        if (result):
+            #printMap (result.getPathMaps(obstacles, storages, height, width))
             print (result.getMoves())
         else:
             print ('No fue posible solucionar el mapa')
