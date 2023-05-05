@@ -81,6 +81,34 @@ def DFS(stateObj, obstacles, storages):
                 tree.append(childNode)
     return None
 
+#BFS (Amplitud - Max 64 Niveles, si no: "No se pudo encontrar solución")
+def BFS(stateObj, obstacles, storages):
+    startNode = Node(stateObj, None, 0)
+    #Añadir el nuevo nodo a la cola del arbol
+    tree = deque([startNode])
+
+    repetido = set()
+
+    while tree:
+        #Obtener el primer nodo agregado y agregarlo como repetido
+        currentNode = tree.popleft()
+        repetido.add(currentNode.state)
+
+        if(currentNode.state.isGoalState(storages)):
+            return currentNode
+        
+        if currentNode.depth >= 64:
+            continue
+
+        validMovesStates = currentNode.state.possibleMoves(storages, obstacles)
+        for childState in validMovesStates:
+            childNode = Node(childState, currentNode, currentNode.depth+1)
+            if childNode.state in repetido:
+                continue
+            else:
+                tree.append(childNode)
+    return None
+
 #Funcion Auxiliar para impresión de las matrices resultantes
 def printMap(matrix):
     height = len(matrix[0])
@@ -152,6 +180,14 @@ if __name__ == '__main__':
         result = DFS(state, obstacles, storages)
         if (result):
             #printMap (result.getPathMaps(obstacles, storages, height, width))
-            print (result.getMoves()+"\n")
+            print (result.getMoves())
+        else:
+            print ('No fue posible solucionar el mapa')
+
+        #Ejecución de la Busqueda por Amplitud
+        result = BFS(state, obstacles, storages)
+        if (result):
+            #printMap (result.getPathMaps(obstacles, storages, high, width))
+            print (result.getMoves())
         else:
             print ('No fue posible solucionar el mapa')
