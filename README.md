@@ -3,6 +3,6 @@ Proyecto de implementación de algortimos de busqueda por profundidad, amplitud 
 
 Adolfo León Maya García - 202025159
 
-Jhon Freddy Popo Moreno - 
+Jhon Freddy Popo Moreno - 202010003 
 
 Herson Stiven Tangarife Davila - 202010007
